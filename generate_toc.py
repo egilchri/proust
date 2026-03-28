@@ -13,18 +13,33 @@ EPUB_PATH = os.path.join(os.path.dirname(__file__), 'Proust-01.epub')
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'docs')
 
 
+# Front/back matter chapter indices (0-based) to hide from the TOC
+SKIP_CHAPTERS = {0, 1, 2, 7}  # chapters 1, 2, 3, 8
+
+# Override titles for chapters whose epub headings are unhelpful
+TITLE_OVERRIDES = {
+    4: "Combray",           # epub title "I"
+    5: "Un amour de Swann", # epub title "II"
+}
+
+
 def main():
     chapters = extract_chapters(EPUB_PATH)
 
     rows = []
     for i, ch in enumerate(chapters):
+        if i in SKIP_CHAPTERS:
+            continue
+
         num = i + 1
         segs = segment_chapter(ch)
         episode_id = f"proust-01-ch{num}"
         html_file = os.path.join(OUTPUT_DIR, f"{episode_id}.html")
         available = os.path.exists(html_file)
 
-        title = ch.title if ch.title != f"Chapter {num}" else f"Chapitre {num}"
+        title = TITLE_OVERRIDES.get(num) or (
+            ch.title if ch.title != f"Chapter {num}" else f"Chapitre {num}"
+        )
         seg_label = f"{len(segs)} segments"
 
         if available:
