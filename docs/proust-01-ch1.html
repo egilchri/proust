@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>À la recherche du temps perdu I – Chapter 1</title>
+        
+        
+        <script>
+            window.__TRANSCRIPT_DATA__ = [{"start": 0.0, "end": 22.61, "b_start": 0.0, "b_end": 38.68, "orig": "Marcel Proust\n(1871-1922)\nÀ la recherche du temps perdu\nI\nDu côté de chez Swann\n(Première partie)\nLa Bibliothèque électronique du Québec\nCollection\nÀ tous les vents\nVolume 315 : version 1.6", "en": "Marcel Proust (1871-1922) In Search of Lost Time I On the Swann Side (First Part) The Electronic Library of Quebec Collection À tous les vents Volume 315: version 1.6"}];
+            window.__VOCAB_DATA__ = {};
+        </script>
+        <style>
+            :root { --primary: #004a99; --accent: #ffc107; --bg: #f0f2f5; }
+            body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg); }
+            .header-box { position: sticky; top: 0; background: rgba(255,255,255,0.98); padding: 10px 15px; border-bottom: 3px solid var(--primary); z-index: 100; backdrop-filter: blur(10px); }
+            .header-top { display: flex; align-items: center; gap: 12px; }
+            .header-left { flex: 1; min-width: 0; }
+            .header-title { margin: 2px 0; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .header-subtitle { font-size: 0.75rem; color: #555; margin-top: 2px; }
+            .header-meta { font-size: 0.65rem; font-weight: bold; color: #666; }
+            .header-meta a { color: #1565c0; text-decoration: none; font-weight: bold; }
+            .changelog-overlay {
+                display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+                z-index: 1000; align-items: center; justify-content: center;
+            }
+            .changelog-overlay.open { display: flex; }
+            .changelog-box {
+                background: white; border-radius: 12px; padding: 20px 24px;
+                max-width: 420px; width: 90%; max-height: 80vh; overflow-y: auto;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            }
+            .changelog-box h2 { margin: 0 0 14px; font-size: 1rem; color: var(--primary); }
+            .changelog-box .cl-close { float: right; cursor: pointer; color: #999; font-size: 1.1rem; }
+            .cl-entry { margin-bottom: 14px; }
+            .cl-date { font-size: 0.7rem; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 3px; }
+            .cl-items { margin: 0; padding-left: 16px; font-size: 0.85rem; color: #333; line-height: 1.6; }
+            .header-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+            audio { width: 220px; height: 36px; }
+            .header-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 6px; padding-top: 6px; border-top: 1px solid #e0e0e0; }
+            .header-controls .divider { color: #ccc; }
+            .mode-toggle { display: flex; border: 1px solid var(--primary); border-radius: 20px; overflow: hidden; }
+            .mode-opt { background: white; color: var(--primary); border: none; padding: 5px 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
+            .mode-opt.active { background: var(--primary); color: white; }
+            .speed-label { font-size: 0.65rem; font-weight: bold; color: #555; }
+            .speed-btn { background: #fff; color: #333; border: 1px solid #ccc; padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; cursor: pointer; }
+            .speed-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+            .vocab-row { display: flex; align-items: center; gap: 8px; }
+            .btn { background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
+            .btn.active { background: var(--accent); color: black; }
+            .transcript { padding: 20px; max-width: 900px; margin: 0 auto; }
+            #word-tip {
+                display: flex; align-items: center; justify-content: space-between;
+                background: #e8f0fe; border: 1px solid #c5d8fb; border-radius: 8px;
+                padding: 8px 12px; margin: 12px 20px 0; font-size: 0.8rem; color: #1a3a6e;
+            }
+            #word-tip-close { cursor: pointer; font-size: 1rem; color: #999; padding-left: 10px; }
+            .row { display: flex; flex-direction: row; margin-bottom: 8px; background: white; border-radius: 12px; border: 1px solid #ddd; overflow: hidden; }
+            .row.highlight { background: #fffde7; border-left: none; outline: 3px solid var(--accent); transition: outline 0.3s ease; }
+            .row-nav {
+                width: 32px; flex-shrink: 0; background: #e8f0fe;
+                display: flex; flex-direction: column; align-items: center;
+                justify-content: flex-start; padding-top: 8px; gap: 6px;
+                cursor: pointer; user-select: none; transition: background 0.15s;
+            }
+            .row.highlight .row-nav { background: #c5d8fb; }
+            .row-nav:active { background: var(--accent); }
+            @keyframes navFlash { 0%,100% { background: #e8f0fe; } 50% { background: var(--accent); } }
+            .row-nav.flash { animation: navFlash 0.35s ease-out; }
+            .row-nav.pinned { background: #fff3cd; }
+            .row.highlight .row-nav.pinned { background: #ffe082; }
+            .pin-btn { font-size: 0.75rem; opacity: 0.4; cursor: pointer; line-height: 1; }
+            .row-nav.pinned .pin-btn { opacity: 1; }
+            .row-content { flex: 1; padding: 12px 15px; display: flex; flex-direction: column; min-width: 0; }
+            #play-btn {
+                display: block; position: fixed; left: 8px; top: 140px; z-index: 50;
+                background: var(--accent); border: none; border-radius: 50%;
+                width: 36px; height: 36px; font-size: 1rem; cursor: pointer;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.2); line-height: 36px; text-align: center;
+            }
+            .orig { color: var(--primary); font-weight: 700; font-size: 1.1rem; }
+            .en { display: none; color: #546e7a; font-style: italic; font-size: 0.95rem; margin-top: 6px; padding-top: 6px; border-top: 1px solid #e8e8e8; }
+            .row.highlight .en { display: block; }
+            .offline-mode .en { display: block; }
+            .status-badge { font-size: 0.7rem; margin-left: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+            .sv-word { cursor: pointer; color: #1565c0; }
+            .sv-word .wikt-arrow { font-size: 0.55em; vertical-align: super; opacity: 0.6; }
+            #word-popup {
+                display: none; position: fixed; z-index: 999;
+                background: white; border: 1px solid #ccc; border-radius: 10px;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.18); padding: 12px 15px;
+                max-width: 280px; font-size: 0.85rem; line-height: 1.5;
+            }
+            #word-popup .wp-lemma { font-size: 1rem; font-weight: bold; color: var(--primary); }
+            #word-popup .wp-trans { color: #546e7a; font-style: italic; margin-bottom: 4px; }
+            #word-popup .wp-cognate { color: #1565c0; font-weight: bold; }
+            #word-popup .wp-etym { color: #555; font-size: 0.78rem; margin-top: 4px; }
+            #word-popup .wp-link { display: inline-block; margin-top: 6px; font-size: 0.75rem; color: #2e7d32; text-decoration: underline; }
+            #word-popup .wp-close { float: right; cursor: pointer; color: #999; font-size: 1rem; line-height: 1; margin-left: 8px; }
+            @media (max-width: 768px) { .row { padding: 10px 12px; } }
+        </style>
+    </head>
+    <body>
+        <div class="header-box">
+            <div class="header-top">
+                <div class="header-left">
+                    <div class="header-meta"><em style="font-weight:normal;">Personal/educational use only.</em></div>
+                    <h1 class="header-title">À la recherche du temps perdu I – Chapter 1</h1>
+                    <div class="header-subtitle">Marcel Proust</div>
+                </div>
+                <div class="header-right">
+                    <audio id="audio" preload="metadata" src="proust-01-ch1.mp3"></audio>
+                    <span id="audio-status" class="status-badge"></span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <span class="speed-label">SPEED:</span>
+                <button class="speed-btn" onclick="setSpeed(0.5)">0.5x</button>
+                <button class="speed-btn" onclick="setSpeed(0.75)">0.75x</button>
+                <button class="speed-btn active" onclick="setSpeed(1.0)">1x</button>
+                <button class="speed-btn" onclick="setSpeed(1.25)">1.25x</button>
+                <button class="speed-btn" onclick="setSpeed(1.5)">1.5x</button>
+                <span class="divider">|</span>
+                <div class="mode-toggle">
+                    <button id="modeOnline" class="mode-opt active" onclick="if(mode!=='orig')toggleMode()">Online</button>
+                    <button id="modeOffline" class="mode-opt" onclick="if(mode!=='bilingual')toggleMode()">Offline</button>
+                </div>
+            </div>
+        </div>
+        
+        <button id="play-btn" onclick="togglePlayPause()">&#x25B6;</button>
+        <div id="word-tip">
+            <span>Tap a <strong style="color:#1565c0;">blue word</strong> in the transcript to see its definition.</span>
+            <span id="word-tip-close" onclick="dismissTip()">&#x2715;</span>
+        </div>
+        <div id="word-popup">
+            <span class="wp-close" onclick="closePopup()">&#x2715;</span>
+            <div class="wp-lemma" id="wp-lemma"></div>
+            <div class="wp-trans" id="wp-trans"></div>
+            <div class="wp-cognate" id="wp-cognate"></div>
+            <div class="wp-etym" id="wp-etym"></div>
+            <a class="wp-link" id="wp-link" target="_blank" rel="noopener">Open in Folkets lexikon &#x2197;</a>
+        </div>
+        <div id="transcript" class="transcript"></div>
+        <script>
+            const audio = document.getElementById('audio');
+            const modeOnline = document.getElementById('modeOnline');
+            const modeOffline = document.getElementById('modeOffline');
+            const statusEl = document.getElementById('audio-status');
+            const container = document.getElementById('transcript');
+            const sources = { orig: "proust-01-ch1.mp3", bilingual: "proust-01-ch1.bilingual.mp3" };
+            const startPattern = null;
+            let mode = 'orig';
+            let data = [];
+            let lastIdx = -1;
+            let seekTargetTime = null;
+            let initialSeekDone = false;
+
+            function applySeek() {
+                if (initialSeekDone || seekTargetTime === null) return;
+                if (audio.readyState >= 1) {
+                    audio.currentTime = seekTargetTime;
+                    initialSeekDone = true;
+                }
+            }
+
+            audio.addEventListener('loadedmetadata', applySeek);
+            audio.addEventListener('canplay', applySeek);
+
+            async function checkAudioStatus() {
+                try {
+                    const response = await fetch(sources[mode], { method: 'HEAD' });
+                    if (response.ok) {
+                        statusEl.innerText = "● Live";
+                        statusEl.style.color = "green";
+                    } else {
+                        statusEl.innerText = "○ Missing";
+                        statusEl.style.color = "orange";
+                    }
+                } catch (e) {
+                    statusEl.innerText = "○ Offline";
+                    statusEl.style.color = "red";
+                }
+            }
+
+            function setSpeed(rate) {
+                audio.playbackRate = rate;
+                document.querySelectorAll('.speed-btn').forEach(btn => {
+                    btn.classList.toggle('active', parseFloat(btn.textContent) === rate);
+                });
+            }
+
+            function toggleMode() {
+                const isPlaying = !audio.paused;
+                const rate = audio.playbackRate;
+                mode = (mode === 'orig') ? 'bilingual' : 'orig';
+                audio.src = sources[mode];
+                audio.playbackRate = rate;
+                lastIdx = -1;
+                if (startPattern !== null && data.length > 0) {
+                    const normPat = startPattern.toLowerCase().replace(/\s+/g, '');
+                    const matchIdx = data.findIndex(item => item.orig.toLowerCase().replace(/\s+/g, '').includes(normPat));
+                    const target = data[matchIdx !== -1 ? matchIdx : 0];
+                    seekTargetTime = (mode === 'orig') ? target.start : target.b_start;
+                    initialSeekDone = false;
+                }
+                checkAudioStatus();
+                if (isPlaying) audio.play();
+                modeOnline.classList.toggle('active', mode === 'orig');
+                modeOffline.classList.toggle('active', mode === 'bilingual');
+                container.classList.toggle('offline-mode', mode === 'bilingual');
+            }
+
+            checkAudioStatus();
+
+            const playBtn = document.getElementById('play-btn');
+            function togglePlayPause() {
+                if (audio.paused) { audio.play(); } else { audio.pause(); }
+            }
+            audio.addEventListener('play', () => { playBtn.innerHTML = '&#x23F8;'; });
+            audio.addEventListener('pause', () => { playBtn.innerHTML = '&#x25B6;'; });
+
+            function movePlayBtn(rowEl) {
+                if (!rowEl) return;
+                const rect = rowEl.getBoundingClientRect();
+                const btnTop = rect.top + rect.height / 2 - 18;
+                playBtn.style.top = btnTop + 'px';
+            }
+
+            let formToEntry = {};
+            let userScrolling = false;
+            let pinnedIdx = -1;
+            let userScrollTimer = null;
+            window.addEventListener('scroll', () => {
+                userScrolling = true;
+                clearTimeout(userScrollTimer);
+                userScrollTimer = setTimeout(() => { userScrolling = false; }, 2000);
+            }, { passive: true });
+
+            (function() {
+                const tip = document.getElementById('word-tip');
+                if (localStorage.getItem('wordTipDismissed')) tip.style.display = 'none';
+            })();
+
+            function dismissTip() {
+                document.getElementById('word-tip').style.display = 'none';
+                localStorage.setItem('wordTipDismissed', '1');
+            }
+
+            function tokenizeOrig(text) {
+                const tokens = text.split(/(\s+|[.,!?;:""''()\[\]–—-]+)/);
+                return tokens.map(tok => {
+                    const key = tok.toLowerCase().replace(/^[""''()\[\]–—-]+|[.,!?;:""''()\[\]–—-]+$/g, '');
+                    const entry = key ? formToEntry[key] : null;
+                    if (!entry) return tok.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                    const safe = tok.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                    const arrow = entry.folkets ? '<span class="wikt-arrow">&#x2197;</span>' : '';
+                    return `<span class="sv-word" data-key="${key}">${safe}${arrow}</span>`;
+                }).join('');
+            }
+
+            let pausedForPopup = false;
+
+            function showWordPopup(key, anchorEl) {
+                const entry = formToEntry[key];
+                if (!entry) return;
+                if (!audio.paused) { audio.pause(); pausedForPopup = true; }
+                const popup = document.getElementById('word-popup');
+                document.getElementById('wp-lemma').textContent = entry.word;
+                document.getElementById('wp-trans').textContent = entry.translation || '';
+                const cogEl = document.getElementById('wp-cognate');
+                cogEl.textContent = entry.cognate ? `cognate: ${entry.cognate}` : '';
+                cogEl.style.display = entry.cognate ? '' : 'none';
+                const etymEl = document.getElementById('wp-etym');
+                etymEl.textContent = entry.etymology || '';
+                etymEl.style.display = entry.etymology ? '' : 'none';
+                const linkEl = document.getElementById('wp-link');
+                if (entry.folkets) {
+                    linkEl.href = `https://folkets-lexikon.csc.kth.se/folkets/folkets.en.html#lookup&${encodeURIComponent(entry.word)}`;
+                    linkEl.style.display = '';
+                } else {
+                    linkEl.style.display = 'none';
+                }
+                popup.style.display = 'block';
+                const rect = anchorEl.getBoundingClientRect();
+                let top = rect.bottom + 6;
+                let left = rect.left;
+                const pw = 280;
+                if (left + pw > window.innerWidth - 10) left = window.innerWidth - pw - 10;
+                if (left < 10) left = 10;
+                popup.style.top = top + 'px';
+                popup.style.left = left + 'px';
+            }
+
+            function closePopup() {
+                document.getElementById('word-popup').style.display = 'none';
+                if (pausedForPopup) { pausedForPopup = false; audio.play(); }
+            }
+
+            document.addEventListener('click', e => {
+                const popup = document.getElementById('word-popup');
+                if (!popup.contains(e.target) && !e.target.classList.contains('sv-word')) {
+                    closePopup();
+                }
+            });
+
+            function makeRowHTML(item) {
+                const origHTML = Object.keys(formToEntry).length > 0 ? tokenizeOrig(item.orig) : item.orig.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                return `<div class="row-nav"><span class="pin-btn">&#x1F4CC;</span></div><div class="row-content"><div class="orig">${origHTML}</div><div class="en">${item.en}</div></div>`;
+            }
+
+            function rerenderTranscript() {
+                data.forEach((item, i) => {
+                    const row = document.getElementById('row-' + i);
+                    if (row) row.innerHTML = makeRowHTML(item);
+                });
+            }
+
+            const _loadVocab = cb => window.__VOCAB_DATA__ ? Promise.resolve(window.__VOCAB_DATA__).then(cb) : fetch('proust-01-ch1.vocab.json').then(r => r.json()).then(cb).catch(() => {});
+            _loadVocab(vocab => {
+                Object.entries(vocab).forEach(([pos, words]) => {
+                    words.forEach(e => {
+                        const entry = { word: e.word, translation: e.translation, pos, cognate: e.cognate || '', etymology: e.etymology || '', folkets: e.folkets || false };
+                        formToEntry[e.word.toLowerCase()] = entry;
+                        (e.forms || []).forEach(f => { formToEntry[f.toLowerCase()] = entry; });
+                    });
+                });
+                rerenderTranscript();
+            }).catch(() => {});
+
+            const _loadTranscript = cb => window.__TRANSCRIPT_DATA__ ? Promise.resolve(window.__TRANSCRIPT_DATA__).then(cb) : fetch('proust-01-ch1.json').then(r => r.json()).then(cb);
+            _loadTranscript(json => {
+                data = json;
+                data.forEach((item, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'row'; row.id = 'row-' + i;
+                    row.innerHTML = makeRowHTML(item);
+                    row.onclick = e => {
+                        const wordEl = e.target.classList.contains('wikt-arrow') ? e.target.closest('.sv-word') : null;
+                        if (e.target.classList.contains('sv-word') || wordEl) {
+                            showWordPopup((wordEl || e.target).dataset.key, wordEl || e.target);
+                        } else if (e.target.classList.contains('pin-btn') || e.target.classList.contains('row-nav')) {
+                            const nav = row.querySelector('.row-nav');
+                            if (e.target.classList.contains('pin-btn')) {
+                                if (pinnedIdx === i) {
+                                    pinnedIdx = -1;
+                                    nav.classList.remove('pinned');
+                                } else {
+                                    if (pinnedIdx !== -1) {
+                                        const old = document.querySelector('.row-nav.pinned');
+                                        if (old) old.classList.remove('pinned');
+                                    }
+                                    pinnedIdx = i;
+                                    nav.classList.add('pinned');
+                                }
+                            }
+                            nav.classList.remove('flash');
+                            void nav.offsetWidth;
+                            nav.classList.add('flash');
+                            setTimeout(() => nav.classList.remove('flash'), 400);
+                            closePopup();
+                            userScrolling = false;
+                            audio.currentTime = (mode === 'orig') ? item.start : item.b_start;
+                            audio.play();
+                            movePlayBtn(row);
+                        }
+                    };
+                    container.appendChild(row);
+                });
+                if (data.length > 0) {
+                    let targetIdx = 0;
+                    if (startPattern !== null) {
+                        const normPat = startPattern.toLowerCase().replace(/\s+/g, '');
+                        const matchIdx = data.findIndex(item => item.orig.toLowerCase().replace(/\s+/g, '').includes(normPat));
+                        targetIdx = matchIdx !== -1 ? matchIdx : 0;
+                    }
+                    const target = data[targetIdx];
+                    seekTargetTime = (mode === 'orig') ? target.start : target.b_start;
+                    const targetRow = document.getElementById('row-' + targetIdx);
+                    if (targetRow) {
+                        requestAnimationFrame(() => {
+                            if (startPattern !== null) targetRow.scrollIntoView({ block: 'center' });
+                            movePlayBtn(targetRow);
+                        });
+                    }
+                    if (startPattern !== null) applySeek();
+                }
+            });
+
+            audio.addEventListener('timeupdate', () => {
+                const now = audio.currentTime;
+                const currentIdx = data.findIndex(item => {
+                    const s = (mode === 'orig') ? item.start : item.b_start;
+                    const e = (mode === 'orig') ? item.end : item.b_end;
+                    return now >= s && now <= e;
+                });
+
+                if (pinnedIdx !== -1) {
+                    const pinEnd = (mode === 'orig') ? data[pinnedIdx].end : data[pinnedIdx].b_end;
+                    const pinStart = (mode === 'orig') ? data[pinnedIdx].start : data[pinnedIdx].b_start;
+                    if (now >= pinEnd) {
+                        audio.pause();
+                        setTimeout(() => {
+                            audio.currentTime = pinStart;
+                            audio.play();
+                        }, 600);
+                    }
+                }
+
+                if (currentIdx !== lastIdx) {
+                    if (lastIdx !== -1) {
+                        const oldEl = document.getElementById('row-' + lastIdx);
+                        if (oldEl) oldEl.classList.remove('highlight');
+                    }
+                    if (currentIdx !== -1) {
+                        const newEl = document.getElementById('row-' + currentIdx);
+                        if (newEl) {
+                            newEl.classList.add('highlight');
+                            if (!userScrolling) newEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            movePlayBtn(newEl);
+                        }
+                    } else {
+                        movePlayBtn(null);
+                    }
+                    lastIdx = currentIdx;
+                } else if (currentIdx !== -1) {
+                    movePlayBtn(document.getElementById('row-' + currentIdx));
+                }
+            });
+        </script>
+    </body>
+    </html>
+    
