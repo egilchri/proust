@@ -1,5 +1,5 @@
 """
-Generate output/index.html table of contents for À la recherche du temps perdu I.
+Generate output/index.html table of contents for À la recherche du temps perdu.
 """
 import os
 import sys
@@ -9,65 +9,76 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../epubkit'))
 from epubkit.epub import extract_chapters
 from epubkit.segment import segment_chapter
 
-EPUB_PATH = os.path.join(os.path.dirname(__file__), 'Proust-01.epub')
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'docs')
 
+VOLUMES = [
+    {
+        "epub":   os.path.join(os.path.dirname(__file__), 'Proust-01.epub'),
+        "label":  "Volume I – Du côté de chez Swann",
+        "prefix": "proust-01",
+        "skip":   {0, 1, 2, 7},   # 0-based indices of front/back matter
+        "titles": {4: "Combray", 5: "Un amour de Swann"},
+    },
+    {
+        "epub":   os.path.join(os.path.dirname(__file__), 'Proust-02.epub'),
+        "label":  "Volume II – À l'ombre des jeunes filles en fleurs",
+        "prefix": "proust-02",
+        "skip":   {0, 1, 5},      # 0-based indices of front/back matter
+        "titles": {},
+    },
+]
 
-# Front/back matter chapter indices (0-based) to hide from the TOC
-SKIP_CHAPTERS = {0, 1, 2, 7}  # chapters 1, 2, 3, 8
 
-# Override titles for chapters whose epub headings are unhelpful
-TITLE_OVERRIDES = {
-    4: "Combray",           # epub title "I"
-    5: "Un amour de Swann", # epub title "II"
-}
-
-
-def main():
-    chapters = extract_chapters(EPUB_PATH)
-
+def volume_rows(vol):
+    chapters = extract_chapters(vol["epub"])
     rows = []
     for i, ch in enumerate(chapters):
-        if i in SKIP_CHAPTERS:
+        if i in vol["skip"]:
             continue
-
         num = i + 1
         segs = segment_chapter(ch)
-        episode_id = f"proust-01-ch{num}"
+        episode_id = f"{vol['prefix']}-ch{num}"
         html_file = os.path.join(OUTPUT_DIR, f"{episode_id}.html")
         available = os.path.exists(html_file)
-
-        title = TITLE_OVERRIDES.get(num) or (
+        title = vol["titles"].get(num) or (
             ch.title if ch.title != f"Chapter {num}" else f"Chapitre {num}"
         )
         seg_label = f"{len(segs)} segments"
-
         if available:
-            row = f"""
+            rows.append(f"""
             <a class="chapter-row available" href="{episode_id}.html">
                 <span class="ch-num">{num}</span>
                 <span class="ch-title">{title}</span>
                 <span class="ch-meta">{seg_label}</span>
                 <span class="ch-arrow">&#x276F;</span>
-            </a>"""
+            </a>""")
         else:
-            row = f"""
+            rows.append(f"""
             <div class="chapter-row unavailable">
                 <span class="ch-num">{num}</span>
                 <span class="ch-title">{title}</span>
                 <span class="ch-meta">{seg_label}</span>
                 <span class="ch-status">coming soon</span>
-            </div>"""
-        rows.append(row)
+            </div>""")
+    return rows
 
-    rows_html = "\n".join(rows)
+
+def main():
+    sections = []
+    for vol in VOLUMES:
+        rows = volume_rows(vol)
+        sections.append(f"""
+        <div class="vol-header">{vol['label']}</div>
+        {"".join(rows)}""")
+
+    body_html = "\n".join(sections)
 
     html = f"""<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>À la recherche du temps perdu I – Interleaved Reader</title>
+    <title>À la recherche du temps perdu – Interleaved Reader</title>
     <style>
         :root {{ --primary: #004a99; --accent: #ffc107; --bg: #f0f2f5; }}
         body {{ font-family: -apple-system, system-ui, sans-serif; margin: 0; background: var(--bg); }}
@@ -80,6 +91,11 @@ def main():
         .chapter-list {{
             max-width: 700px; margin: 24px auto; padding: 0 16px;
             display: flex; flex-direction: column; gap: 8px;
+        }}
+        .vol-header {{
+            font-size: 0.75rem; font-weight: bold; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--primary);
+            margin-top: 16px; margin-bottom: 4px; padding-left: 4px;
         }}
         .chapter-row {{
             display: flex; align-items: center; gap: 12px;
@@ -104,11 +120,11 @@ def main():
 </head>
 <body>
     <div class="header-box">
-        <h1>À la recherche du temps perdu I</h1>
+        <h1>À la recherche du temps perdu</h1>
         <div class="subtitle">Marcel Proust &nbsp;&middot;&nbsp; Interleaved French–English Reader</div>
     </div>
     <div class="chapter-list">
-        {rows_html}
+        {body_html}
     </div>
 </body>
 </html>"""
