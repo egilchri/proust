@@ -40,8 +40,10 @@
             .header-controls { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 6px; padding-top: 6px; border-top: 1px solid #e0e0e0; }
             .header-controls .divider { color: #ccc; }
             .mode-toggle { display: flex; border: 1px solid var(--primary); border-radius: 20px; overflow: hidden; }
-            .mode-opt { background: white; color: var(--primary); border: none; padding: 5px 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
+            .mode-opt { background: white; color: var(--primary); border: none; padding: 5px 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; line-height: 1.2; }
             .mode-opt.active { background: var(--primary); color: white; }
+            .mode-prog { display: block; font-size: 0.6rem; font-weight: normal; opacity: 0.7; margin-top: 2px; }
+            .mode-prog:empty { display: none; }
             .speed-label { font-size: 0.65rem; font-weight: bold; color: #555; }
             .speed-btn { background: #fff; color: #333; border: 1px solid #ccc; padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; cursor: pointer; }
             .speed-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
@@ -73,7 +75,7 @@
             .row-nav.pinned .pin-btn { opacity: 1; }
             .row-content { flex: 1; padding: 12px 15px; display: flex; flex-direction: column; min-width: 0; }
             #play-btn {
-                display: block; position: fixed; left: 8px; top: 140px; z-index: 50;
+                display: none; position: fixed; left: 8px; z-index: 50;
                 background: var(--accent); border: none; border-radius: 50%;
                 width: 36px; height: 36px; font-size: 1rem; cursor: pointer;
                 box-shadow: 0 2px 6px rgba(0,0,0,0.2); line-height: 36px; text-align: center;
@@ -81,7 +83,12 @@
             .orig { color: var(--primary); font-weight: 700; font-size: 1.1rem; }
             .en { display: none; color: #546e7a; font-style: italic; font-size: 0.95rem; margin-top: 6px; padding-top: 6px; border-top: 1px solid #e8e8e8; }
             .row.highlight .en { display: block; }
-            .offline-mode .en { display: block; }
+            .en.revealed { display: block; }
+            body.reading-mode .row-nav { display: none; }
+            body.reading-mode #play-btn { display: none !important; }
+            body.reading-mode .speed-label,
+            body.reading-mode .speed-btn { display: none; }
+            .jump-btn { background: #fff3cd; color: #7a5c00; border: 1px solid #ffc107; padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; cursor: pointer; font-weight: bold; }
             .status-badge { font-size: 0.7rem; margin-left: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
             .sv-word { cursor: pointer; color: #1565c0; }
             .sv-word .wikt-arrow { font-size: 0.55em; vertical-align: super; opacity: 0.6; }
@@ -122,9 +129,11 @@
                 <button class="speed-btn" onclick="setSpeed(1.5)">1.5x</button>
                 <span class="divider">|</span>
                 <div class="mode-toggle">
-                    <button id="modeOnline" class="mode-opt active" onclick="if(mode!=='orig')toggleMode()">Online</button>
-                    <button id="modeOffline" class="mode-opt" onclick="if(mode!=='bilingual')toggleMode()">Offline</button>
+                    <button id="modePodcast" class="mode-opt active" onclick="setMode('orig')" title="Listen and follow along with the translated text">Podcast<span class="mode-prog" id="prog-orig"></span></button>
+                    <button id="modeInterleaved" class="mode-opt" onclick="setMode('bilingual')" title="Listen to alternating source and English audio">Interleaved<span class="mode-prog" id="prog-bilingual"></span></button>
+                    <button id="modeReading" class="mode-opt" onclick="setMode('reading')" title="Scroll through source and translation &#x2014; no audio">Reading<span class="mode-prog" id="prog-reading"></span></button>
                 </div>
+                <button id="jump-btn" class="jump-btn" style="display:none" onclick="jumpToLast()">&#x21A9; Resume</button>
             </div>
         </div>
         
@@ -144,12 +153,14 @@
         <div id="transcript" class="transcript"></div>
         <script>
             const audio = document.getElementById('audio');
-            const modeOnline = document.getElementById('modeOnline');
-            const modeOffline = document.getElementById('modeOffline');
+            const modePodcast = document.getElementById('modePodcast');
+            const modeInterleaved = document.getElementById('modeInterleaved');
+            const modeReading = document.getElementById('modeReading');
             const statusEl = document.getElementById('audio-status');
             const container = document.getElementById('transcript');
             const sources = { orig: "proust-01-ch1.mp3", bilingual: "proust-01-ch1.bilingual.mp3" };
             const startPattern = null;
+            const epKey = 'proust.vol1-ch1';
             let mode = 'orig';
             let data = [];
             let lastIdx = -1;
@@ -169,7 +180,7 @@
 
             async function checkAudioStatus() {
                 try {
-                    const response = await fetch(sources[mode], { method: 'HEAD' });
+                    const response = await fetch(sources[mode] || sources['orig'], { method: 'HEAD' });
                     if (response.ok) {
                         statusEl.innerText = "● Live";
                         statusEl.style.color = "green";
@@ -190,11 +201,95 @@
                 });
             }
 
-            function toggleMode() {
+            // --- Reading mode ---
+            let readingObserver = null;
+
+            function enterReadingMode() {
+                audio.pause();
+                document.body.classList.add('reading-mode');
+                document.querySelectorAll('.row').forEach(row => {
+                    if (readingObserver) readingObserver.observe(row);
+                });
+                if (epKey) {
+                    const saved = parseInt(localStorage.getItem('readScroll_' + epKey) || '0');
+                    if (saved > 0) requestAnimationFrame(() => window.scrollTo({ top: saved, behavior: 'instant' }));
+                }
+            }
+
+            function exitReadingMode() {
+                document.body.classList.remove('reading-mode');
+                if (readingObserver) { readingObserver.disconnect(); }
+                document.querySelectorAll('.en.revealed').forEach(el => el.classList.remove('revealed'));
+            }
+
+            readingObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const enEl = entry.target.querySelector('.en');
+                        if (enEl) enEl.classList.add('revealed');
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            // --- Sticky position ---
+            function updateModeProgress() {
+                if (!epKey) return;
+                const audioPct = parseFloat(localStorage.getItem('audioPct_' + epKey) || '0');
+                const readPct  = parseFloat(localStorage.getItem('readPct_'  + epKey) || '0');
+                document.getElementById('prog-orig').textContent      = audioPct > 0 ? Math.round(audioPct) + '%' : '';
+                document.getElementById('prog-bilingual').textContent = audioPct > 0 ? Math.round(audioPct) + '%' : '';
+                document.getElementById('prog-reading').textContent   = readPct  > 0 ? Math.round(readPct)  + '%' : '';
+            }
+
+            function updateJumpBtn() {
+                if (!epKey) return;
+                const saved = parseFloat(localStorage.getItem('audioPos_' + epKey) || '0');
+                document.getElementById('jump-btn').style.display = (mode !== 'reading' && saved > 5) ? '' : 'none';
+            }
+
+            function jumpToLast() {
+                if (!epKey || mode === 'reading') return;
+                const saved = parseFloat(localStorage.getItem('audioPos_' + epKey) || '0');
+                if (!saved || !data.length) return;
+                audio.currentTime = saved;
+                const idx = data.findIndex(item => saved >= item.start && saved <= item.end);
+                if (idx !== -1) {
+                    const row = document.getElementById('row-' + idx);
+                    if (row) { userScrolling = false; row.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                }
+                audio.play();
+            }
+
+            let lastSaveWallTime = 0;
+            function saveAudioPos() {
+                if (epKey && mode !== 'reading' && audio.currentTime > 5) {
+                    localStorage.setItem('audioPos_' + epKey, audio.currentTime.toString());
+                    if (audio.duration > 0) {
+                        localStorage.setItem('audioPct_' + epKey, (audio.currentTime / audio.duration * 100).toString());
+                    }
+                    lastSaveWallTime = Date.now();
+                    updateModeProgress();
+                }
+            }
+            audio.addEventListener('pause', saveAudioPos);
+
+            function setMode(newMode) {
+                if (newMode === mode) return;
+                const wasReading = (mode === 'reading');
+                const willRead = (newMode === 'reading');
+                if (wasReading) exitReadingMode();
                 const isPlaying = !audio.paused;
                 const rate = audio.playbackRate;
-                mode = (mode === 'orig') ? 'bilingual' : 'orig';
-                audio.src = sources[mode];
+                mode = newMode;
+                if (epKey) localStorage.setItem('epMode_' + epKey, mode);
+                modePodcast.classList.toggle('active', mode === 'orig');
+                modeInterleaved.classList.toggle('active', mode === 'bilingual');
+                modeReading.classList.toggle('active', mode === 'reading');
+                if (willRead) {
+                    enterReadingMode();
+                    return;
+                }
+                audio.src = sources[mode] || sources['orig'];
                 audio.playbackRate = rate;
                 lastIdx = -1;
                 if (startPattern !== null && data.length > 0) {
@@ -206,12 +301,12 @@
                 }
                 checkAudioStatus();
                 if (isPlaying) audio.play();
-                modeOnline.classList.toggle('active', mode === 'orig');
-                modeOffline.classList.toggle('active', mode === 'bilingual');
-                container.classList.toggle('offline-mode', mode === 'bilingual');
+                updateJumpBtn();
             }
 
             checkAudioStatus();
+            updateJumpBtn();
+            updateModeProgress();
 
             const playBtn = document.getElementById('play-btn');
             function togglePlayPause() {
@@ -221,20 +316,33 @@
             audio.addEventListener('pause', () => { playBtn.innerHTML = '&#x25B6;'; });
 
             function movePlayBtn(rowEl) {
-                if (!rowEl) return;
+                if (!rowEl) { playBtn.style.display = 'none'; return; }
                 const rect = rowEl.getBoundingClientRect();
                 const btnTop = rect.top + rect.height / 2 - 18;
                 playBtn.style.top = btnTop + 'px';
+                playBtn.style.display = 'block';
             }
 
             let formToEntry = {};
             let userScrolling = false;
             let pinnedIdx = -1;
             let userScrollTimer = null;
+            let readScrollTimer = null;
             window.addEventListener('scroll', () => {
                 userScrolling = true;
                 clearTimeout(userScrollTimer);
                 userScrollTimer = setTimeout(() => { userScrolling = false; }, 2000);
+                if (epKey && mode === 'reading') {
+                    clearTimeout(readScrollTimer);
+                    readScrollTimer = setTimeout(() => {
+                        localStorage.setItem('readScroll_' + epKey, window.scrollY.toString());
+                        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                        if (maxScroll > 0) {
+                            localStorage.setItem('readPct_' + epKey, (window.scrollY / maxScroll * 100).toString());
+                        }
+                        updateModeProgress();
+                    }, 500);
+                }
             }, { passive: true });
 
             (function() {
@@ -331,6 +439,20 @@
             const _loadTranscript = cb => window.__TRANSCRIPT_DATA__ ? Promise.resolve(window.__TRANSCRIPT_DATA__).then(cb) : fetch('proust-01-ch1.json').then(r => r.json()).then(cb);
             _loadTranscript(json => {
                 data = json;
+                // Restore sticky mode
+                if (epKey) {
+                    const savedMode = localStorage.getItem('epMode_' + epKey);
+                    if (savedMode && savedMode !== mode) {
+                        mode = savedMode;
+                        modePodcast.classList.toggle('active', mode === 'orig');
+                        modeInterleaved.classList.toggle('active', mode === 'bilingual');
+                        modeReading.classList.toggle('active', mode === 'reading');
+                        if (mode !== 'reading') {
+                            audio.src = sources[mode] || sources['orig'];
+                            checkAudioStatus();
+                        }
+                    }
+                }
                 data.forEach((item, i) => {
                     const row = document.createElement('div');
                     row.className = 'row'; row.id = 'row-' + i;
@@ -367,28 +489,46 @@
                     };
                     container.appendChild(row);
                 });
-                if (data.length > 0) {
-                    let targetIdx = 0;
-                    if (startPattern !== null) {
-                        const normPat = startPattern.toLowerCase().replace(/\s+/g, '');
-                        const matchIdx = data.findIndex(item => item.orig.toLowerCase().replace(/\s+/g, '').includes(normPat));
-                        targetIdx = matchIdx !== -1 ? matchIdx : 0;
+                if (mode === 'reading') {
+                    enterReadingMode();
+                } else if (data.length > 0) {
+                    const savedPos = epKey ? parseFloat(localStorage.getItem('audioPos_' + epKey) || '0') : 0;
+                    if (savedPos > 5) {
+                        seekTargetTime = savedPos;
+                        initialSeekDone = false;
+                        applySeek();
+                    } else {
+                        let targetIdx = 0;
+                        if (startPattern !== null) {
+                            const normPat = startPattern.toLowerCase().replace(/\s+/g, '');
+                            const matchIdx = data.findIndex(item => item.orig.toLowerCase().replace(/\s+/g, '').includes(normPat));
+                            targetIdx = matchIdx !== -1 ? matchIdx : 0;
+                        }
+                        const target = data[targetIdx];
+                        seekTargetTime = (mode === 'orig') ? target.start : target.b_start;
+                        const targetRow = document.getElementById('row-' + targetIdx);
+                        if (targetRow) {
+                            requestAnimationFrame(() => {
+                                if (startPattern !== null) targetRow.scrollIntoView({ block: 'center' });
+                                movePlayBtn(targetRow);
+                            });
+                        }
+                        if (startPattern !== null) applySeek();
                     }
-                    const target = data[targetIdx];
-                    seekTargetTime = (mode === 'orig') ? target.start : target.b_start;
-                    const targetRow = document.getElementById('row-' + targetIdx);
-                    if (targetRow) {
-                        requestAnimationFrame(() => {
-                            if (startPattern !== null) targetRow.scrollIntoView({ block: 'center' });
-                            movePlayBtn(targetRow);
-                        });
-                    }
-                    if (startPattern !== null) applySeek();
+                    updateJumpBtn();
                 }
             });
 
             audio.addEventListener('timeupdate', () => {
                 const now = audio.currentTime;
+                // Save to localStorage every 5s; update display every tick
+                if (Date.now() - lastSaveWallTime > 5000) saveAudioPos();
+                if (epKey && audio.duration > 0 && mode !== 'reading') {
+                    const pct = Math.round(now / audio.duration * 100);
+                    document.getElementById('prog-orig').textContent = pct > 0 ? pct + '%' : '';
+                    document.getElementById('prog-bilingual').textContent = pct > 0 ? pct + '%' : '';
+                }
+
                 const currentIdx = data.findIndex(item => {
                     const s = (mode === 'orig') ? item.start : item.b_start;
                     const e = (mode === 'orig') ? item.end : item.b_end;

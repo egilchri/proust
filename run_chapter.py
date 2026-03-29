@@ -50,6 +50,7 @@ def main():
         title=f'À la recherche du temps perdu I – {chapter.title}',
         subtitle='Marcel Proust',
         etymology_cache=etymology_cache,
+        ep_key=f'proust.vol1-ch{args.chapter}',
     )
 
 if __name__ == '__main__':
